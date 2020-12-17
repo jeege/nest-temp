@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Query, Body } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, UseInterceptors } from '@nestjs/common';
 import { CardService } from './card.service';
 import { Card } from './card.entity';
 import { CreateCardDto } from './dto/card.dto'
+import { TansformInterceptor } from '../../common/interceptors/transform.interceptor';
 
+@UseInterceptors(TansformInterceptor)
 @Controller('card')
 export class CardController {
     constructor(private readonly cardService: CardService) {}
