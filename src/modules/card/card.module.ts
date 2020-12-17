@@ -1,18 +1,17 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CardService } from './card.service';
 import { CardController } from './card.controller';
-import { LoggerMiddleware } from '../../common/middleware/logger.middleware';
 import { Card } from './card.entity'
-
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { TansformInterceptor } from '../../common/interceptors/transform.interceptor'
 @Module({
   imports: [TypeOrmModule.forFeature([Card])],
-  providers: [CardService],
+  providers: [CardService, {
+    provide: APP_INTERCEPTOR,
+    useClass: TansformInterceptor
+  }],
   controllers: [CardController]
 })
-export class CardModule implements NestModule{
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware)
-    .forRoutes(CardController);
-  }
+export class CardModule {
 }

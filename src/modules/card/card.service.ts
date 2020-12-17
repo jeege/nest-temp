@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Card } from './card.entity';
+import { CreateCardDto } from './dto/card.dto'
+
 @Injectable()
 export class CardService {
     constructor(
@@ -13,16 +15,13 @@ export class CardService {
         return this.cardsRepository.find();
     }
 
-    getCardDetail(id: string): string {
-        return '卡片详情' + id;
+    getCardDetail(id: number): Promise<Card> {
+        return this.cardsRepository.findOne({id});
     }
 
-    async insertCard() {
+    async insertCard(createCardDto: CreateCardDto) {
         const card = new Card();
-        card.name = '老虎'
-        card.voice = 'https://www.baidu.com'
-        card.img = 'https://www.baidu.com'
-        card.type = 2
+        Object.assign(card, createCardDto)
         await this.cardsRepository.save(card)
     }
 }
