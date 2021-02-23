@@ -12,10 +12,21 @@ export class TansformInterceptor<T> implements NestInterceptor<T, Response<T>> {
         context: ExecutionContext,
         next: CallHandler
     ) : Observable<Response<T>> {
-        return next.handle().pipe(map(data => ({
-            code: 1,
-            data,
-            message: '请求成功'
-        })))
+        return next.handle().pipe(map(data => {
+            const ctx = context.switchToHttp();
+            const response = ctx.getResponse();
+            // const request = ctx.getRequest();
+            // 请求路由
+            // const url = request.originalUrl; 
+            const code = response.statusCode;
+            const res = {
+                code,
+                msg: '请求成功',
+                success: true,
+                data,
+            };
+            // responseLogger.info(url, res);
+            return res
+        }))
     }
 }
