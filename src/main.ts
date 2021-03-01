@@ -7,6 +7,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: true
   });
+  app.enableCors();
   app.useGlobalFilters(new HttpExceptionFilter())
   app.useGlobalInterceptors(new TansformInterceptor())
   await app.listen(3000);

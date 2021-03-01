@@ -30,7 +30,7 @@ function createPaginationObject<T>(
 }
 
 function resolveNumbericOption(
-    options: PaginationOptions,
+    options: Partial<PaginationOptions>,
     key: 'pageNo' | 'pageSize',
     defaultValue: number
 ): number {
@@ -46,7 +46,7 @@ function resolveNumbericOption(
 
 export async function pagination<T>(
     repository: Repository<T>,
-    options: (FindConditions<T> | FindManyOptions<T>) & PaginationOptions
+    options: (FindConditions<T> | FindManyOptions<T>) & Partial<PaginationOptions>
 ): Promise<Pagination<T>> {
 
     const pageSize = resolveNumbericOption(options, 'pageSize', DEFAULT_PAGE_SIZE)
