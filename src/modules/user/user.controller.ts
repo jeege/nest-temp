@@ -1,6 +1,5 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, HttpCode, HttpStatus, Post, Query, Request, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, HttpCode, HttpStatus, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Token } from 'src/common/decorators/token.decorator';
 import { Pagination, PaginationOptions } from 'src/utils/pagination.util';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from './user.entity';
@@ -25,5 +24,10 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     async list(@Query() options: Partial<User & PaginationOptions>): Promise<Pagination<User>> {
         return await this.userService.findAll(options)
+    }
+
+    @Get('remove')
+    async remove(@Query('id') id) {
+        this.userService.removeUser(id)
     }
 }

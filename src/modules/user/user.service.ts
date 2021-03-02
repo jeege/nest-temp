@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { defaultAdmin } from 'src/config/constants';
 import { pagination, Pagination, PaginationOptions } from 'src/utils/pagination.util';
 import { Repository } from 'typeorm';
 import { User } from './user.entity'
@@ -9,7 +10,14 @@ export class UserService {
     constructor(
         @InjectRepository(User)
         private UserRepository: Repository<User>,
-    ) {}
+    ) {
+        const { name, password } = defaultAdmin
+        this.createUser({name, password}).then(() => {
+            console.log(`已创建默认用户：${name},密码：${password}`)
+        }).catch(() => {
+            console.log('已存在默认用户')
+        })
+    }
 
     /**
      * 创建用户
@@ -28,6 +36,10 @@ export class UserService {
         return newUser
     }
 
+    async removeUser(id): Promise<void> {
+        await this.UserRepository.softDelete(id)
+    }
+
     async findById(id: number): Promise<User> {
         return this.UserRepository.findOne(id)
     } 
@@ -36,7 +48,10 @@ export class UserService {
         return pagination(this.UserRepository, queryParams)
     }
 
-
+    /**
+     * 用户登陆
+     * @param user 
+     */
     async login(user: Partial<User>): Promise<User> {
         const {name, password} = user
         const existUser = await this.UserRepository.findOne({ where: { name }})

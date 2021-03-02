@@ -1,5 +1,5 @@
 import { Exclude } from "class-transformer";
-import { BeforeInsert, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BeforeInsert, Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import * as bcrypt from "bcryptjs"
 
 @Entity()
@@ -40,6 +40,14 @@ export class User {
         name: 'update_time'
     })
     updateTime: Date;
+
+    @Exclude()
+    @DeleteDateColumn({
+        type: 'datetime',
+        comment: '删除',
+        name: 'delete_time'
+    })
+    deleteTime: Date; 
 
     @BeforeInsert()
     encrypt() {
