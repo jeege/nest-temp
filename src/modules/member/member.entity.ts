@@ -1,31 +1,37 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Generated, TreeParent, TreeChildren, TreeLevelColumn, Tree } from 'typeorm';
 
 @Entity()
+@Tree("closure-table")
 export class Member {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
+  @Generated("uuid")
+  memberId: string;
+
+  @Column()
   name: string;
-
-  @Column()
-  spouse: string;
-
-  @Column()
-  parentId: number;
-
-  @Column()
-  levelId: number;
 
   @Column()
   isSure: boolean;
 
   @Column()
-  remark: string;
+  isRelatedByBlood: boolean;
 
-  @Column()
-  born: string;
+  @Column('date')
+  born: Date;
 
-  @Column()
-  dead: string;
+  @Column({
+    type: 'date',
+    nullable: true
+  })
+  dead: Date;
+
+  @TreeParent()
+  parent: Member;
+
+  @TreeChildren({ cascade: true })
+  children: Member[];
+
 }

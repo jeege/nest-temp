@@ -23,9 +23,15 @@ export class User {
     @Column({ length: 50 })
     name: string;
 
+    @Column({ length: 500, default: null })
+    avatar: string; // 头像
+
     @Exclude()
     @Column({ length: 500 })
     password: string;
+
+    @Column('simple-enum', { enum: ['admin', 'editor'], default: 'admin' })
+    role: string; // 用户角色
 
     @CreateDateColumn({
         type: 'datetime',

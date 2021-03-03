@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { defaultAdmin } from 'src/config/constants';
+import { defaultAdmin } from 'src/constants/common.constants';
 import { pagination, Pagination, PaginationOptions } from 'src/utils/pagination.util';
 import { Repository } from 'typeorm';
 import { User } from './user.entity'

@@ -4,7 +4,7 @@ import { PassportModule } from "@nestjs/passport";
 import { UserModule } from "../user/user.module";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
-import { jwtConstants } from "../../config/constants";
+import { jwtConstants } from "../../constants/common.constants";
 import { JwtStrategy } from "./jwt.strategy";
 
 const passportModule = PassportModule.register({

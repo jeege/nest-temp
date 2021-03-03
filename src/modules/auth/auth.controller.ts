@@ -1,5 +1,5 @@
 import { Body, ClassSerializerInterceptor, Controller, HttpCode, HttpStatus, Post, UseInterceptors } from "@nestjs/common";
-import { SetHeader } from "src/common/decorators/set-cookie.decorator";
+import { SetHeader } from "src/common/decorators/set-header.decorator";
 import { AuthService } from "./auth.service";
 
 @Controller('auth')

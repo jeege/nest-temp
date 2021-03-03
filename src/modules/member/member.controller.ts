@@ -1,26 +1,37 @@
-import { Controller, Get, Post, Query, Body } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, HttpCode, HttpStatus, Delete } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { Member } from './member.entity';
-import { CreateMemberDto } from './dto/member.dto'
 
 
 @Controller('Member')
 export class MemberController {
-    constructor(private readonly MemberService: MemberService) {}
+    constructor(private readonly memberService: MemberService) {}
 
     @Get('list')
     getMemberList(): Promise<Member[]>{
-        return this.MemberService.getMemberList();
+        return this.memberService.getMemberList();
     }
 
     @Get('detail')
     getMemberDetail(@Query('id') id: string): Promise<Member> {
-        return this.MemberService.getMemberDetail(+id);
+        return this.memberService.getMemberDetail(id);
+    }
+
+    @Delete('remove')
+    async deleteMember(@Query('id') id: string) {
+        return await this.memberService.removeMember(id)
+    }
+
+    @Get('children')
+    async getChildrens(@Query('id') id: string) {
+        const parent = await this.memberService.getMemberDetail(id)
+        return this.memberService.getChildrens(parent)
     }
 
     @Post('insert')
-    async insertMember(@Body() createMemberDto: CreateMemberDto): Promise<string>  {
-        await this.MemberService.insertMember(createMemberDto)
-        return '成功'
+    @HttpCode(HttpStatus.OK)
+    async insertMember(@Body() createMemberDto: Partial<Member & {parentId: string}>): Promise<void>  {
+        const parent = createMemberDto.parentId ? await this.memberService.getMemberDetail(createMemberDto.parentId) : null
+        await this.memberService.insertMember(createMemberDto, parent)
     }
 }
