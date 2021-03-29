@@ -3,9 +3,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataBaseConfig } from './config/database';
 import { AuthModule } from './modules/auth/auth.module';
 import { MemberModule } from './modules/member/member.module';
+import { NovelModule } from './modules/novel/novel.module';
 import { UserModule } from './modules/user/user.module';
 @Module({
-  imports: [TypeOrmModule.forRoot(DataBaseConfig), UserModule, AuthModule, MemberModule],
+  imports: [...DataBaseConfig.map(conf => TypeOrmModule.forRoot(conf)), UserModule, AuthModule, MemberModule, NovelModule],
   controllers: [],
   providers: [],
 })

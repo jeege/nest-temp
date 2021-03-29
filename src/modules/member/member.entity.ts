@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, Generated, TreeParent, TreeChildren, TreeLevelColumn, Tree } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Generated, TreeParent, TreeChildren, Tree } from 'typeorm';
 
 @Entity()
 @Tree("closure-table")

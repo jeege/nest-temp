@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection, TreeRepository } from 'typeorm';
+import { TreeRepository } from 'typeorm';
 import { Member } from './member.entity';
 
 @Injectable()
@@ -20,14 +20,8 @@ export class MemberService {
 
     async removeMember(id: string) {
         const member = await this.getMemberDetail(id)
-        await getConnection()
-            .createQueryBuilder()
-            .delete()
-            .from('member_closure')
-            .where('id_ancestor = :id', {id: member.id})
-            .orWhere('id_descendant = :id', {id: member.id})
-            .execute()
-        return await this.MembersRepository.remove(member)
+        const children = await this.MembersRepository.findAncestors(member)
+        await this.MembersRepository.remove(children)
     }
 
     async getChildrens(parent: Member) {
