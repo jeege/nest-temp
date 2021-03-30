@@ -44,7 +44,7 @@ export class UserService {
         return this.UserRepository.findOne(id)
     } 
 
-    async findAll(queryParams: Partial<User & PaginationOptions>): Promise<Pagination<User>> {
+    async findAll(queryParams: Partial<User & PaginationOptions<User>>): Promise<Pagination<User>> {
         return pagination(this.UserRepository, queryParams)
     }
 

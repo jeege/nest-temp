@@ -32,7 +32,7 @@ export class UserController {
     @UseInterceptors(ClassSerializerInterceptor)
     @Get('list')
     @UseGuards(JwtAuthGuard)
-    async list(@Query() options: Partial<User & PaginationOptions>): Promise<Pagination<User>> {
+    async list(@Query() options: Partial<User & PaginationOptions<User>>): Promise<Pagination<User>> {
         return await this.userService.findAll(options)
     }
 
