@@ -1,4 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpService, HttpStatus, Injectable } from "@nestjs/common";
+import { Cron } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Pagination, pagination } from "src/utils/pagination.util";
 import { Repository } from "typeorm";
@@ -8,7 +9,8 @@ import { Novel } from "./novel.entity";
 export class NovelService {
     constructor(
         @InjectRepository(Novel, 'novel')
-        private NovelRepository: Repository<Novel>
+        private NovelRepository: Repository<Novel>,
+        private readonly httpService: HttpService
     ) {}
 
     async getList(options): Promise<Pagination<Novel>> {
@@ -16,7 +18,69 @@ export class NovelService {
     }
 
     async insertNovel(novel) {
+        const { novelId } = novel
+        const existNovel = await this.NovelRepository.findOne({ where: { novelId }})
+        if (existNovel) {
+            throw new HttpException('小说已存在', HttpStatus.BAD_REQUEST)
+        }
+
         const  newNovel = await this.NovelRepository.create(novel)
         await this.NovelRepository.save(newNovel)
+    }
+
+    async getEvaluation(novelId) {
+        const res =  await this.httpService.request({
+            url: `http://www.zxcs.me/content/plugins/cgz_xinqing/cgz_xinqing_action.php?action=show&id=${novelId}`
+        }).toPromise()
+        if (res.status === 200) {
+            return res.data.split(',')
+        }
+    }
+
+    async getNextNovel(novelId) {
+        const res = await this.httpService.request({
+            url: `http://www.zxcs.me/post/${novelId}`,
+            headers: {
+                'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
+            }
+        }).toPromise()
+        if (res.status === 200) {
+            const data = res.data
+            const nextNovel = (/<div class="prevlog">(.*?)<\/div>/.exec(data))[1]
+            const nextInfo = /http:\/\/www.zxcs.me\/post\/(\d*).*<\/span>(.*)<\/a>/.exec(nextNovel)
+            const novel: Partial<Novel> = {}
+            if (nextInfo) {
+                novel.novelId = nextInfo[1];
+                novel.novelName = nextInfo[2].trim();
+                [novel.a, novel.b, novel.c, novel.d, novel.e] = await this.getEvaluation(novel.novelId)
+                return novel
+            } else {
+                return null
+            }
+        }
+    }
+
+    @Cron('0 0 0 * * *')
+    async updateNovel() {
+        const latestNovel = await this.NovelRepository.findOne({
+            order: {
+                id: "DESC"
+            }
+        })
+        console.log(`开始更新小说，上一本${latestNovel.novelId}`)
+        let nextNovel = await this.getNextNovel(latestNovel.novelId)
+        while(nextNovel) {
+            const data = await this.insertNovel(nextNovel).catch(err => {
+                console.error(`已存在小说：${nextNovel.novelName}`)
+                return err.getStatus()
+            })
+            if (data === 400) {
+                nextNovel = null
+            } else {
+                console.log(`已添加${nextNovel.novelName}`)
+                nextNovel = await this.getNextNovel(nextNovel.novelId)
+            }
+        }
+        console.log('更新结束')
     }
 }

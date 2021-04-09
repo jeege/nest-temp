@@ -10,6 +10,11 @@ export class NovelController {
     @Get('list')
     async list(@Query() options: Partial<PaginationOptions<Novel>>) {
         return this.novelService.getList(options)
+    } 
+    
+    @Get('latest')
+    async getLatestNovel() {
+        return this.novelService.updateNovel()
     }
 
     @Post('add')
