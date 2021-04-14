@@ -40,7 +40,6 @@ function resolveNumbericOption(
     if(Number.isInteger(resolvedValue) && resolvedValue >= 0)
     return resolvedValue
     
-    console.warn(`分页参数不合法，请进行校验`)
     return defaultValue
 }
 

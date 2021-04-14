@@ -1,6 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { defaultAdmin } from 'src/constants/common.constants';
+import { CustomLogger } from 'src/interfaces/logger.interface';
 import { pagination, Pagination, PaginationOptions } from 'src/utils/pagination.util';
 import { Repository } from 'typeorm';
 import { User } from './user.entity'
@@ -8,14 +9,15 @@ import { User } from './user.entity'
 @Injectable()
 export class UserService {
     constructor(
+        @Inject('winston') private logger: CustomLogger,
         @InjectRepository(User)
         private UserRepository: Repository<User>,
     ) {
         const { name, password } = defaultAdmin
         this.createUser({name, password}).then(() => {
-            console.log(`已创建默认用户：${name},密码：${password}`)
+            this.logger.info(`已创建默认用户：${name},密码：${password}`)
         }).catch(() => {
-            console.log('已存在默认用户')
+            this.logger.warning('已存在默认用户')
         })
     }
 

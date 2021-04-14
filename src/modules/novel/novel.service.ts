@@ -1,6 +1,7 @@
-import { HttpException, HttpService, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpService, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
+import { CustomLogger } from "src/interfaces/logger.interface";
 import { Pagination, pagination } from "src/utils/pagination.util";
 import { Repository } from "typeorm";
 import { Novel } from "./novel.entity";
@@ -8,6 +9,7 @@ import { Novel } from "./novel.entity";
 @Injectable()
 export class NovelService {
     constructor(
+        @Inject('winston') private logger: CustomLogger,
         @InjectRepository(Novel, 'novel')
         private NovelRepository: Repository<Novel>,
         private readonly httpService: HttpService
@@ -67,20 +69,37 @@ export class NovelService {
                 id: "DESC"
             }
         })
-        console.log(`开始更新小说，上一本${latestNovel.novelId}`)
+        this.logger.task(`开始更新小说，上一本${latestNovel.novelId}`)
         let nextNovel = await this.getNextNovel(latestNovel.novelId)
         while(nextNovel) {
             const data = await this.insertNovel(nextNovel).catch(err => {
-                console.error(`已存在小说：${nextNovel.novelName}`)
+                this.logger.task(`已存在小说：${nextNovel.novelName}`)
                 return err.getStatus()
             })
             if (data === 400) {
                 nextNovel = null
             } else {
-                console.log(`已添加${nextNovel.novelName}`)
+                this.logger.task(`已添加${nextNovel.novelName}`)
                 nextNovel = await this.getNextNovel(nextNovel.novelId)
             }
         }
-        console.log('更新结束')
+        this.logger.task('更新结束')
+    }
+
+    @Cron('0 0 0 15 * *')
+    async updateEvaluation() {
+        const list = await this.NovelRepository.find()
+        list.forEach(async novel => {
+            try {
+                const [a,b,c,d,e] = await this.getEvaluation(novel.novelId)
+                const merged = this.NovelRepository.merge(novel, { a, b, c, d, e })
+                await this.NovelRepository.save(merged)
+                this.logger.task(`已更新小说${novel.novelName}的评价`)
+                return true
+            } catch (error) {
+                this.logger.task(`更新小说${novel.novelName}的评价出错了，错误信息：${error.message}`)
+                return false
+            }
+        })
     }
 }

@@ -1,6 +1,7 @@
 import { Injectable, NestInterceptor, CallHandler, ExecutionContext } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { CustomLogger } from 'src/interfaces/logger.interface';
 
 export interface Response<T> {
     data: T;
@@ -8,6 +9,7 @@ export interface Response<T> {
 
 @Injectable()
 export class TansformInterceptor<T> implements NestInterceptor<T, Response<T>> {
+    constructor(private readonly logger: CustomLogger) {}
     intercept(
         context: ExecutionContext,
         next: CallHandler
@@ -15,9 +17,9 @@ export class TansformInterceptor<T> implements NestInterceptor<T, Response<T>> {
         return next.handle().pipe(map(data => {
             const ctx = context.switchToHttp();
             const response = ctx.getResponse();
-            // const request = ctx.getRequest();
+            const request = ctx.getRequest();
             // 请求路由
-            // const url = request.originalUrl; 
+            const url = request.originalUrl; 
             const code = response.statusCode;
             const res = {
                 code,
@@ -25,7 +27,7 @@ export class TansformInterceptor<T> implements NestInterceptor<T, Response<T>> {
                 success: true,
                 data,
             };
-            // responseLogger.info(url, res);
+            this.logger.info(`请求成功：${url} body: ${request.body ? JSON.stringify(request.body) : '{}'}`);
             return res
         }))
     }
