@@ -86,10 +86,11 @@ export class NovelService {
         this.logger.task('更新结束')
     }
 
-    @Cron('0 0 0 15 * *')
+    @Cron('0 0 22 14 * *')
     async updateEvaluation() {
+        this.logger.task('开始更新小说评价')
         const list = await this.NovelRepository.find()
-        list.forEach(async novel => {
+        Promise.all(list.map(async novel => {
             try {
                 const [a,b,c,d,e] = await this.getEvaluation(novel.novelId)
                 const merged = this.NovelRepository.merge(novel, { a, b, c, d, e })
@@ -100,6 +101,8 @@ export class NovelService {
                 this.logger.task(`更新小说${novel.novelName}的评价出错了，错误信息：${error.message}`)
                 return false
             }
+        })).then(() => {
+            this.logger.task('评价更新完成')
         })
     }
 }
