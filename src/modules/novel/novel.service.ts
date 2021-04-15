@@ -86,7 +86,7 @@ export class NovelService {
         this.logger.task('更新结束')
     }
 
-    @Cron('0 5 22 14 * *')
+    @Cron('0 15 22 14 * *')
     async updateEvaluation() {
         this.logger.task('开始更新小说评价')
         const list = await this.NovelRepository.find()
