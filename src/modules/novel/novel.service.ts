@@ -2,8 +2,7 @@ import { HttpException, HttpService, HttpStatus, Inject, Injectable } from "@nes
 import { Cron } from "@nestjs/schedule";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CustomLogger } from "src/interfaces/logger.interface";
-import { Pagination, pagination } from "src/utils/pagination.util";
-import { Repository } from "typeorm";
+import { FindConditions, Like, Repository } from "typeorm";
 import { Novel } from "./novel.entity";
 
 @Injectable()
@@ -15,8 +14,19 @@ export class NovelService {
         private readonly httpService: HttpService
     ) {}
 
-    async getList(options): Promise<Pagination<Novel>> {
-        return pagination(this.NovelRepository, options)
+    async getList(options): Promise<{
+        list: Novel[],
+        total: number
+    }> {
+        const whereOption:FindConditions<Novel> = {}
+        if (options.query.keyword) {
+            whereOption.novelName = Like(`%${options.query.keyword}%`)
+        }
+        const [ list, total ] = await this.NovelRepository.findAndCount({
+            where: whereOption,
+            ...options.searchParam
+        })
+        return { list, total }
     }
 
     async insertNovel(novel) {

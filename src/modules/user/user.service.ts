@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { defaultAdmin } from 'src/constants/common.constants';
 import { CustomLogger } from 'src/interfaces/logger.interface';
-import { pagination, Pagination, PaginationOptions } from 'src/utils/pagination.util';
 import { Repository } from 'typeorm';
 import { User } from './user.entity'
 
@@ -46,8 +45,11 @@ export class UserService {
         return this.UserRepository.findOne(id)
     } 
 
-    async findAll(queryParams: Partial<User & PaginationOptions<User>>): Promise<Pagination<User>> {
-        return pagination(this.UserRepository, queryParams)
+    async findAll(options) {
+        const [ list, total ] = await this.UserRepository.findAndCount({
+            ...options.searchParam
+        })
+        return { list, total }
     }
 
     /**

@@ -1,6 +1,5 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query } from "@nestjs/common";
-import { PaginationOptions } from "src/utils/pagination.util";
-import { Novel } from "./novel.entity";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from "@nestjs/common";
+import { SearchParam  } from "src/common/decorators/pagination.decorator";
 import { NovelService } from "./novel.service";
 
 @Controller('Novel')
@@ -8,7 +7,7 @@ export class NovelController {
     constructor(private readonly novelService: NovelService) {}
 
     @Get('list')
-    async list(@Query() options: Partial<PaginationOptions<Novel>>) {
+    async list(@SearchParam() options) {
         return this.novelService.getList(options)
     } 
     

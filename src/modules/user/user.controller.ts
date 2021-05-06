@@ -1,7 +1,7 @@
 import { Body, ClassSerializerInterceptor, Controller, Get, HttpCode, HttpStatus, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { SearchParam } from 'src/common/decorators/pagination.decorator';
 import { Token } from 'src/common/decorators/token.decorator';
-import { Pagination, PaginationOptions } from 'src/utils/pagination.util';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { User } from './user.entity';
 import { UserService } from './user.service';
@@ -32,7 +32,7 @@ export class UserController {
     @UseInterceptors(ClassSerializerInterceptor)
     @Get('list')
     @UseGuards(JwtAuthGuard)
-    async list(@Query() options: Partial<User & PaginationOptions<User>>): Promise<Pagination<User>> {
+    async list(@SearchParam() options){
         return await this.userService.findAll(options)
     }
 
